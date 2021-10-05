@@ -59,7 +59,16 @@ export class RouterSource {
         const _createHref = this._createHref;
         const createHref = util.makeCreateHref(namespace, _createHref);
 
-        return this._history$
+        return this._history$.fold(
+                ({ last }, actual) => ({
+                    last: actual,
+                    out: last?.state?.key && last?.state?.key === actual?.state?.key ? undefined : actual
+                }),
+                {
+                    last: undefined,
+                    out: undefined
+                }
+            ).filter(v => !!v.out).map(v => v.out)
             .map((location: Location) => {
                 const matcher = routeMatcher || this._routeMatcher;
                 const filteredPath = getFilteredPath(
